@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Room</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<style>
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    transition: background-image 0.5s ease-in-out;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 35px 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+h1 {
+    margin-bottom: 15px;
+    font-size: 28px;
+    color: #ffffff;
+}
+
+input, select {
+    padding: 12px;
+    margin: 12px 0;
+    width: 90%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus, select:focus {
+    border-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+button {
+    padding: 12px 28px;
+    margin: 8px;
+    background: linear-gradient(135deg, #6c63ff, #a594f9);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.5);
+}
+
+button.hidden {
+    display: none;
+}
+
+#timerDisplay {
+    font-size: 48px;
+    margin: 20px 0;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.streak {
+    margin: 12px 0;
+    font-weight: 600;
+    font-size: 18px;
+    color: #ffb6c1;
+}
+
+#sessionType {
+    font-size: 22px;
+    margin-top: 15px;
+    color: #ffffff;
+}
+
+</style>
+<body>
+    <div class="container">
+        <h1>📚 Study Room</h1>
+
+        <!-- Streak display -->
+        <div id="streakDisplay" class="streak">🔥 Current Streak: Loading...</div>
+        
+
+        <!-- Background selector -->
+        <select id="bgSelect">
+            <option value="default">Select background</option>
+            <option value="rain">Rainy Window</option>
+            <option value="forest">Forest Calm</option>
+            <option value="beach">Sunset</option>
+            <option value="mountain">Cozy View</option>
+            <option value="Autumn">Autumn View</option>
+            <option value="Winter">Winter View</option>
+        </select>
+
+
+        <!-- Study input -->
+        <input type="number" id="studyMinutes" placeholder="Enter total study minutes" />
+        <button id="startBtn">Start Session</button>
+
+        <!-- Timer section -->
+        <div id="timerSection" class="hidden">
+            <h2 id="sessionType">Focus</h2>
+            <div id="timerDisplay">00:00</div>
+            <button id="pauseBtn">Pause</button>
+            <button id="resumeBtn" class="hidden">Resume</button>
+        </div>
+    </div>
+
+    <script>
+        let totalMinutes = 0;
+let sessions = [];
+let currentSessionIndex = 0;
+let currentTime = 0;
+let timer = null;
+let isPaused = false;
+let audio = null;
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    totalMinutes = parseInt(document.getElementById('studyMinutes').value);
+    if (!totalMinutes || totalMinutes < 1) return alert("Please enter valid minutes!");
+
+    let minutesLeft = totalMinutes;
+    sessions = [];
+
+    while (minutesLeft >= 25) {
+        sessions.push({ type: 'focus', duration: 25 });
+        if (minutesLeft >= 30) {
+            sessions.push({ type: 'break', duration: 5 });
+            minutesLeft -= 30;
+        } else {
+            minutesLeft -= 25;
+        }
+    }
+
+    if (minutesLeft > 0) {
+        sessions.push({ type: 'focus', duration: minutesLeft });
+    }
+
+    document.getElementById('timerSection').classList.remove('hidden');
+    document.getElementById('startBtn').disabled = true;
+    startSession();
+});
+
+document.getElementById('pauseBtn').addEventListener('click', () => {
+    clearInterval(timer);
+    isPaused = true;
+    document.getElementById('pauseBtn').classList.add('hidden');
+    document.getElementById('resumeBtn').classList.remove('hidden');
+});
+
+document.getElementById('resumeBtn').addEventListener('click', () => {
+    isPaused = false;
+    document.getElementById('pauseBtn').classList.remove('hidden');
+    document.getElementById('resumeBtn').classList.add('hidden');
+    startTimer();
+});
+
+document.getElementById('bgSelect').addEventListener('change', (e) => {
+    let val = e.target.value;
+    let imgUrl = "";
+    let music = "";
+
+    if (val === "rain") {
+        imgUrl = "url('https://i.ytimg.com/vi/EJfXedt2Sj4/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBeMiQDBFJCOvrqSTi6uyUi-Muigg')";
+        music = "/sounds/rain.mp3";
+    } else if (val === "forest") {
+        imgUrl = "url('https://thumbs.dreamstime.com/b/cozy-colorful-lofi-study-desk-set-empty-interior-messy-jungle-anime-manga-style-d-cor-327529058.jpg')";
+        music = "/sounds/forest.mp3";
+    } else if (val === "beach") {
+        imgUrl = "url('https://images5.alphacoders.com/132/1328865.png')";
+        music = "/sounds/beach.mp3";
+    } else if (val === "mountain") {
+        imgUrl = "url('https://cdn.prod.website-files.com/60babc2f4a97cece9858d8e7/634f6224f0e88e5536a1ddc8_hq720.jpeg')";
+        music = "/sounds/mountain.mp3";
+    } 
+    else if(val=="Winter"){
+        imgUrl = "url('https://i.ytimg.com/vi/YydPJhEle4o/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBntcSvzBuuhXUzvC-SaPaQEumbTQ')";
+        music = "/sounds/Winter.mp3";
+    }else if(val==="Autumn"){
+        imgUrl = "url('https://i.ytimg.com/vi/v0IvAkyk_5Q/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBWMvQcwV7MWsog6SOdwCReY0e6xg')";
+        music = "/sounds/autumn.mp3";
+    }
+    else{
+        imgUrl = "url('https://cdn.prod.website-files.com/60babc2f4a97cece9858d8e7/634f6224f7785fef6fb21cd3_hq720.jpeg')";
+        music = "/sounds/thunder.mp3";
+    }
+
+    document.body.style.backgroundImage = imgUrl;
+    playMusic(music);
+});
+
+function startSession() {
+    if (currentSessionIndex >= sessions.length) {
+        saveSession();
+        alert("🎉 All sessions completed! Well done!");
+        return;
+    }
+
+    let session = sessions[currentSessionIndex];
+    currentTime = session.duration * 60;
+    document.getElementById('sessionType').innerText = session.type === 'focus' ? "Focus" : "Break";
+    startTimer();
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        if (!isPaused) {
+            if (currentTime > 0) {
+                currentTime--;
+                updateDisplay();
+            } else {
+                clearInterval(timer);
+                currentSessionIndex++;
+                startSession();
+            }
+        }
+    }, 1000);
+}
+
+function updateDisplay() {
+    let minutes = Math.floor(currentTime / 60);
+    let seconds = currentTime % 60;
+    document.getElementById('timerDisplay').innerText =
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function saveSession() {
+    fetch('/api/study/save-session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // 🟢 Adjust based on your auth
+        },
+        body: JSON.stringify({ minutes: totalMinutes })
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            fetchStreak();
+        })
+        .catch(err => console.error(err));
+}
+
+function fetchStreak() {
+    fetch('/api/study/get-streak', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('streakDisplay').innerText = `🔥 Current Streak: ${data.count} days`;
+        })
+        .catch(err => console.error(err));
+}
+
+function playMusic(src) {
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+    if (src) {
+        audio = new Audio(src);
+        audio.loop = true;
+        audio.volume = 0.4;
+        audio.play();
+    }
+}
+
+
+fetchStreak();
+document.body.style.backgroundImage = "url('https://cdn.prod.website-files.com/60babc2f4a97cece9858d8e7/634f6224f7785fef6fb21cd3_hq720.jpeg')";
+playMusic("/sounds/thunder.mp3");
+
+    </script>
+</body>
+</html>

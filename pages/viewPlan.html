@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Study Planner - View Full Plan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #004d40;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00695c;
+            margin-bottom: 30px;
+        }
+
+        .plan-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .day-plan {
+            background-color: #ffffff;
+            border-left: 5px solid #00695c;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .date-heading {
+            margin: 0 0 10px 0;
+            color: #004d40;
+            font-size: 20px;
+            border-bottom: 1px solid #b2dfdb;
+            padding-bottom: 5px;
+        }
+
+        .task-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .task-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .status-done {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-missed {
+            color: red;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid #00695c;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #004d40;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 105, 92, 0.2);
+            color: #00695c;
+            border-color: #004d40;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📅 Your Study Plan</h1>
+
+    <div class="plan-container" id="planContainer" style="height: 625px; overflow-y: scroll;">
+        <!-- Plans will be added here dynamically -->
+    </div>
+    <div class="button-container">
+        <button onclick="exportPDF()" class="download-btn">⬇️ Download Full Plan</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function exportPDF() {
+            const plan = document.getElementById("planContainer");
+            const button = document.querySelector(".download-btn");
+
+            // Hide button
+            // button.style.display = 'none';
+
+            // Save container styles
+            const originalHeight = plan.style.height;
+            const originalOverflow = plan.style.overflow;
+
+            plan.style.height = 'auto';
+            plan.style.overflow = 'visible';
+            // button.style.display = 'none';
+
+            html2pdf()
+                .from(plan)
+                .set({
+                    margin: 0.5,
+                    filename: 'My_Study_Plan.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                })
+                .save()
+                .then(() => {
+                    // Restore styles
+                    plan.style.height = originalHeight;
+                    plan.style.overflow = originalOverflow;
+                    button.style.display = 'inline-block';
+                    button.style.display = 'none';
+                });
+        }
+
+
+        function loadFullPlan() {
+            const token = localStorage.getItem('token');
+
+            fetch('http://localhost:5000/api/plan/all', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(plans => {
+                    const container = document.getElementById('planContainer');
+
+                    if (plans.length === 0) {
+                        container.innerHTML = "<p style='text-align:center;'>No plans found. Add subjects to generate your schedule!</p>";
+                        return;
+                    }
+
+                    plans.forEach(p => {
+                        const dayDiv = document.createElement('div');
+                        dayDiv.classList.add('day-plan');
+
+                        const dateHeading = document.createElement('h3');
+                        dateHeading.classList.add('date-heading');
+                        dateHeading.textContent = `📅 ${p.date}`;
+                        dayDiv.appendChild(dateHeading);
+
+                        const ul = document.createElement('ul');
+                        ul.classList.add('task-list');
+
+                        p.tasks.forEach(t => {
+                            const li = document.createElement('li');
+                            const statusClass = t.status === 'done' ? 'status-done' : t.status === 'missed' ? 'status-missed' : 'status-pending';
+                            li.innerHTML = `<strong>${t.subject}</strong> - ${t.title} (${t.duration} mins) 
+                            <span class="${statusClass}">[${t.status}]</span>`;
+                            ul.appendChild(li);
+                        });
+
+                        dayDiv.appendChild(ul);
+                        container.appendChild(dayDiv);
+                    });
+                });
+        }
+
+        loadFullPlan();
+    </script>
+</body>
+
+</html>

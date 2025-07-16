@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner Setup</title>
+</head>
+<style>
+    body{
+        background-color: #e0f7fa;
+        color: #004d40;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+    }
+    .container{
+        display: flex;
+        flex-direction: column;
+        width: 344px;
+        margin: 100px auto;
+        background-color: #b2dfdb;
+        color: #004d40;
+        padding: 20px;
+        height: 220px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    input,button{
+        padding: 10px;
+        margin: 5px;
+        border-radius: 8px;
+        border: #004d40;
+        cursor: pointer;
+    }
+    a{
+        padding: 10px;
+        text-decoration: none;
+        color: #004d40;
+        font-size: 16px;
+    }
+    button{
+        background-color: #004d40;
+        color: white;
+        font-size: 16px;
+        border: white;
+    }
+</style>
+<body>
+    <h1 class="heading">Planner setup</h1>
+    <div class="container">
+        <h2 class="heading">How many hours do you study daily?</h2>
+        <input type="number" class="study-hours" placeholder="Enter hours" min="0" max="24">
+        <button class="generate-plan-button" onclick="submitDailyHours()">Generate Plan</button>
+        <a href="add-subject.html" class="add-subject">Want to add more subject? Click here</a>
+    </div>
+<script>
+    function submitDailyHours(){
+        const hours = document.querySelector(".study-hours").value;
+        const token = localStorage.getItem("token");
+
+        // Check if hours is a valid number
+        if (!hours || hours <= 0) {
+            alert("Please enter valid study hours!");
+            return;
+        }
+
+        fetch("http://localhost:5000/api/plan/generate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ dailyHours: hours })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            alert("Plan generated successfully!");
+            window.location.href = "index.html"; // redirect to dashboard
+        })
+        .catch(error => {
+            console.error("Error generating plan:", error);
+            alert("Something went wrong!");
+        });
+    }
+</script>
+
+</body>
+</html>

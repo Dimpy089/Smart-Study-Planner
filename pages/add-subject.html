@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>add-subject</title>
+</head>
+<style>
+    body{
+        padding: 0px;
+        margin: 0px;
+        background-color: #e0f7fa;
+        color: #004d40;
+    }
+    .heading{
+        height: 70px;
+        text-align: center;
+        font-size: 50px;
+        color: #00695c;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        background-color:  #b2dfdb;
+        margin: 0px;
+        padding: 0px;
+    }
+    .form-group{
+        margin-bottom: 15px;
+    }
+    .form-container{
+        width: 300px;
+        height: auto;
+        margin: 50px auto;
+        padding: 10px;
+        background-color: #b2dfdb;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0,15);
+        font-size: larger;
+        color: #00695c;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-bottom: 20px;
+    }
+    .form-container h2 {
+        text-align: center;
+        color: #00695c;
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+    input,select{
+        width: 100%;
+        font-size: 16px;
+        border: 1px solid #80cbc4;
+        border-radius: 8px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+    button{
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-size: 16px;
+        background-color: #00695c;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        button:hover{
+            background-color: #004d40;
+        }
+    }
+    .back-link{
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #004d40;
+        text-decoration: none;
+    }
+
+
+</style>
+<body>
+    <div class="heading">Smart Study Planner</div>
+    <div class="form-container">
+        <h2>Add subject</h2>
+
+        <form id="subject-form">
+            <div class="form-group">
+                <label form="subject-name">Subject name</label>
+                <input type="text" id="subject-name" name="subject-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="topic-name">Topic-name</label>
+                <input type="text" id="topic-name" name="topic-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="difficulty">Difficulty</label>
+                <select id="difficulty" name="difficulty" required>
+                    <option value="" disabled selected>Select difficulty</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority" required>
+                    <option value="" disabled selected>Select Priority</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+            <label for="examDate">ExamDate</label>
+            <input type="date" value={examDate} class="examDate" required /></div>
+            
+            <div class="form-group">
+                <button type="submit">Add Subject</button>
+            </div>
+        </form>
+        <a href="index.html" class="back-link"> Back To Dashboard</a>
+        <a href="PlannerSetup.html" class="back-link"> Make Plan</a>
+    </div>
+    <script>
+        
+
+        document.getElementById('subject-form').addEventListener('submit',async (e)=>{
+            e.preventDefault();
+            const subjectName=document.getElementById('subject-name').value;
+            const topicName=document.getElementById('topic-name').value;
+            const difficulty=document.getElementById('difficulty').value;
+            const priority=document.getElementById('priority').value;
+            const examDate=document.querySelector('.examDate').value;
+
+            const token=localStorage.getItem("token");
+
+            if (!token) {
+                alert("You must be logged in to add a subject.");
+                window.location.href = "login.html";
+                return;
+            }
+            try{
+            const res=await fetch("http://localhost:5000/api/subjects/add",{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                    Authorization:`Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    subject: subjectName,
+                    title: [topicName],
+                    priority,
+                    difficulty,
+                    examDate
+                }),
+            });
+            const data=await res.json();
+            if(res.ok){
+                alert("Subject added successfully!");
+                window.location.href="add-subject.html";
+            }
+            else{
+                alert("Error adding subject:"+ data.message);
+            }
+        }catch(error){
+            console.error("Error",error);
+            alert("Something went wrong!");
+        }
+        });
+    </script>
+</body>
+</html>
+

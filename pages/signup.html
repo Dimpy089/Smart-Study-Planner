@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup page</title>
+</head>
+<style>
+    body{
+        padding: 0;
+        margin: 0;
+        background-color: #e0f7fa;
+        color: #004d40;
+    }
+    .signup-form{
+        display: flex;
+        flex-direction: column;
+        width: 344px;
+        margin: 100px auto;
+        background-color: #b2dfdb;
+        color: #004d40;
+        padding: 20px;
+        height: 322px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .heading{
+        text-align: center;
+        font-size: 36px;
+        color: #00695c;
+    }
+    input{
+        /* width: 95%;
+        padding: 7px;
+        margin-top: 10px;
+         */
+        width: 100%;
+        font-size: 16px;
+        border: 1px solid #80cbc4;
+        border-radius: 8px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        margin-top: 3px;
+    }
+    .username-text,.password-text{
+        font-size: 18px;
+        color: #00695c;
+    }
+    .signup-button{
+        width: 100%;
+        padding: 5px;
+        background-color: #004d40;
+        color: white;
+        font-size: 18px;
+        border: white;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .login-link{
+        text-decoration: none;
+        margin-top: 23px;
+        color: #004d40;
+        text-align: center;
+        font-size: 16px;
+    }
+</style>
+<body>
+    <div class="signup-form">
+        <h1 class="heading">Signup</h1>
+        <label for="username" class="username-text">Username</label>
+        <input type="text" class="username" placeholder="Username" required>
+        <br>
+        <label for="password" class="password-text">Password</label>
+        <input type="text" class="password" placeholder="Password" required>
+        <br>
+        <button type="submit" class="signup-button">Signup</button>
+
+        <a href="login.html" class="login-link">Already have an account---Login here</a>
+    </div>
+    <script>
+        document.querySelector('.signup-button').addEventListener('click',async function(event){
+            event.preventDefault();
+            const username= document.querySelector('.username').value;
+            const password= document.querySelector('.password').value;
+            try{
+            const response= await fetch('http://localhost:5000/api/auth/signup',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify({username,password})
+            })
+            const data=await response.json();
+            if(response.ok){
+                alert("Signup successfull!!");
+                window.location.href="login.html";
+            }
+            else {
+                alert(data.message || "Signup failed!");
+            }}catch(error){
+                alert("Error: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
