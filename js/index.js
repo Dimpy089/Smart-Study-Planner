@@ -5,6 +5,7 @@ const subjectRouters=require('../routes/subjectRouters');
 const planRoutes = require('../routes/plan');
 const authRoutes=require('../routes/authRoutes');//adding after authentification
 const studyRoutes = require('../routes/StudyRoutes');
+const path = require('path');
 require('dotenv').config();
 
 const app=express();
@@ -15,6 +16,12 @@ app.use('/api/subjects',subjectRouters);
 app.use('/api/auth',authRoutes);
 app.use('/api/plan', planRoutes);
 app.use('/api/study', studyRoutes);
+
+app.use(express.static(path.join(__dirname, '../pages')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../pages', 'index.html'));
+});
 
 app.get('/', (req, res) => {
   res.send('Smart Study Planner backend is running!');
