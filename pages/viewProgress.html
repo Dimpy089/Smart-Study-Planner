@@ -87,7 +87,7 @@
     <script>
         function loadFullPlan(){
             let token=localStorage.getItem("token");
-            fetch('http://localhost:5000/api/plan/all',{
+            fetch('https://smart-study-planner-production.up.railway.app/plan/all',{
                 headers:{
                     'Authorization':`Bearer ${token}`
                 }
