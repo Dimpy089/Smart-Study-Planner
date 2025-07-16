@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGO_URI,{
     useUnifiedTopology: true
 }).then(()=>{
     console.log('Connect to MongoDB successfully');
-    const port = process.env.PORT;
+    const port = process.env.PORT || 8080;
     if (!port) {
         console.error('Error: PORT environment variable not set.');
         process.exit(1);
