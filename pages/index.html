@@ -226,7 +226,7 @@
             function loadLeft() {
                 const token = localStorage.getItem("token");
                 const today = new Date().toISOString().split('T')[0];
-                fetch(`http://localhost:5000/api/plan/${today}`, {
+                fetch(`https://smart-study-planner-production.up.railway.app/plan/${today}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -248,7 +248,7 @@
             function loadTodayPlan() {
                 const token = localStorage.getItem("token");
                 const today = new Date().toISOString().split('T')[0];
-                fetch(`http://localhost:5000/api/plan/${today}`, {
+                fetch(`https://smart-study-planner-production.up.railway.app/plan/${today}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -276,7 +276,7 @@
             }
             function markDone(date, title) {
                 const token = localStorage.getItem("token");
-                fetch("http://localhost:5000/api/plan/update-status", {
+                fetch("https://smart-study-planner-production.up.railway.app/plan/update-status", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -302,7 +302,7 @@
 
             function markMissed(date, title) {
                 const token = localStorage.getItem("token");
-                fetch("http://localhost:5000/api/plan/update-status", {
+                fetch("https://smart-study-planner-production.up.railway.app/plan/update-status", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
