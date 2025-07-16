@@ -16,6 +16,10 @@ app.use('/api/auth',authRoutes);
 app.use('/api/plan', planRoutes);
 app.use('/api/study', studyRoutes);
 
+app.get('/', (req, res) => {
+  res.send('Smart Study Planner backend is running!');
+});
+
 mongoose.connect(process.env.MONGO_URI,{
     useNewUrlParser: true,
     useUnifiedTopology: true
