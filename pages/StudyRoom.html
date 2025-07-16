@@ -260,7 +260,7 @@ function updateDisplay() {
 }
 
 function saveSession() {
-    fetch('/api/study/save-session', {
+    fetch('https://smart-study-planner-production.up.railway.app/study/save-session', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ function saveSession() {
 }
 
 function fetchStreak() {
-    fetch('/api/study/get-streak', {
+    fetch('https://smart-study-planner-production.up.railway.app/study/get-streak', {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
