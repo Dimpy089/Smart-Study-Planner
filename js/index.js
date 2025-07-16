@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
   res.send('Smart Study Planner backend is running!');
 });
 
-mongoose.connect(MONGO_URI).then(()=>{
+mongoose.connect(process.env.MONGO_URI).then(()=>{
     console.log('Connect to MongoDB successfully');
     const port = process.env.PORT || 8080;
     if (!port) {
